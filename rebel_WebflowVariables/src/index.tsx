@@ -1,53 +1,88 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
+import * as webflowApi from './webflow-api';
+
+// Define a simple type for our state, using `any` as per the API module
+type VariableCollection = any;
 
 const App: React.FC = () => {
-  const addText = async () => {
-    // Get the current selected Element
-    const el = await webflow.getSelectedElement();
+  const [canPerformActions, setCanPerformActions] = useState<boolean>(false);
+  const [collections, setCollections] = useState<VariableCollection[]>([]);
+  const [message, setMessage] = useState<string>('Welcome to the Rebel Webflow Variables App!');
 
-    // If text content can be set, update it!
-    if (el && el.textContent) {
-      await el.setTextContent("hello world!");
+  // Check for design capabilities when the app loads
+  useEffect(() => {
+    const checkCapabilities = async () => {
+      const can = await webflowApi.canDesign();
+      setCanPerformActions(can);
+      if (!can) {
+        setMessage('App is in read-only mode. Switch to Design Mode to enable actions.');
+      }
+    };
+    checkCapabilities();
+  }, []);
+
+  const handleAddText = async () => {
+    if (!canPerformActions) return;
+    await webflowApi.setTextOnSelectedElement('Hello from React!');
+    setMessage('Text added to selected element.');
+  };
+
+  const handleFetchCollections = async () => {
+    if (!canPerformActions) return;
+    const fetchedCollections = await webflowApi.getAllVariableCollections();
+    setCollections(fetchedCollections);
+    setMessage(`Fetched ${fetchedCollections.length} variable collections.`);
+  };
+
+  // A simple example of creating a variable
+  const handleCreateVariable = async () => {
+    if (!canPerformActions) return;
+    const defaultCollection = await webflowApi.getDefaultVariableCollection();
+    if (defaultCollection) {
+      const newColor = `#${Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0')}`;
+      await webflowApi.createColorVariable(defaultCollection, 'My New Color', newColor);
+      setMessage(`Created new color variable in the default collection.`);
     } else {
-      alert("Please select a text element");
+      setMessage('Could not find a default collection to add a variable to.');
     }
   };
 
   return (
     <div>
-      <h1>Welcome to My React App!</h1>
-      <p>This is a basic React application.</p>
-      <button onClick={addText}> Add text </button>
+      <h4>{message}</h4>
+      <button onClick={handleAddText} disabled={!canPerformActions}>
+        Add Text to Element
+      </button>
+      <button onClick={handleFetchCollections} disabled={!canPerformActions}>
+        Fetch Variable Collections
+      </button>
+      <button onClick={handleCreateVariable} disabled={!canPerformActions}>
+        Create New Color Variable
+      </button>
+      <hr />
+      <h5>Variable Collections:</h5>
+      {collections.length > 0 ? (
+        <ul>
+          {collections.map((collection) => (
+            <li key={collection.id}>{collection.name || collection.id}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No collections loaded yet.</p>
+      )}
     </div>
   );
 };
 
-
-
-document.getElementById("lorem").onsubmit = async (event) => {
-  
-  // Prevent the default form submission behavior, which would reload the page
-  event.preventDefault()
-
-  // Get the currently selected element in the Designer
-  const el = await webflow.getSelectedElement()
-
-  // Check if an element was returned, and the element can contain text content
-  if (el && el.textContent) {
-    // If we found the element and it has the ability to update the text content,
-    // replace it with some placeholder text
-    el.setTextContent(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do " +
-      "eiusmod tempor incididunt ut labore et dolore magna aliqua."
-    )
-  } else { // If an element isn't selected, or an element doesn't have text content, notify the user
-    await webflow.notify({ type: 'Error', message: "Please select an element that contains text." })
-  }
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
 }
-
-
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
-root.render(<App />);

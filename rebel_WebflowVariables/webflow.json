@@ -1,6 +1,6 @@
 {
-  "name": "'rebel  webflow variables'",
-  "publicDir": "public",
-  "size": "default",
+  "name": "'REBEL Webflow Variables'",
+  "publicDir": "dist",
+  "size": "large",
   "apiVersion": "2"
 }
