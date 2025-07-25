@@ -15,6 +15,41 @@ type Variable = any;
 type SizeValue = { unit: string; value: number };
 type CustomValue = { type: 'custom'; value: string };
 
+// --- Error Handling ---
+
+/**
+ * A centralized error handler for Webflow API calls.
+ * It logs the full error to the console for debugging and shows a
+ * user-friendly notification in the Designer.
+ * @param error The error object caught from a try/catch block.
+ * @param contextMessage A message describing the context of the error.
+ */
+function handleApiError(error: any, contextMessage: string) {
+  console.error(contextMessage, error);
+  let userMessage = 'An unexpected error occurred. Please try again.';
+
+  if (error && error.cause && error.cause.tag) {
+    switch (error.cause.tag) {
+      case 'DuplicateValue':
+        userMessage = 'A variable with this name already exists. Please choose a unique name.';
+        break;
+      case 'ResourceMissing':
+        userMessage = 'The requested item (e.g., element, style, or variable) could not be found.';
+        break;
+      case 'InvalidTargetElement':
+        userMessage = 'The selected element is not valid for this operation.';
+        break;
+      case 'Forbidden':
+        userMessage = 'Permission denied. Ensure you are in Design Mode on the Main Branch.';
+        break;
+      default:
+        // Use the error message if available, otherwise a generic one.
+        userMessage = error.message || `An error occurred: ${error.cause.tag}`;
+        break;
+    }
+  }
+  webflow.notify({ type: 'Error', message: userMessage });
+}
 // --- General & Utility Functions ---
 
 /**
@@ -35,27 +70,43 @@ export const canDesign = async (): Promise<boolean> => {
     }
     return capabilities.canDesign;
   } catch (error) {
-    console.error('Error checking capabilities:', error);
-    await webflow.notify({ type: 'Error', message: 'Could not verify permissions.' });
+    handleApiError(error, 'Error checking capabilities:');
     return false;
   }
 };
 
 /**
  * Sets the text content of the currently selected element.
- * @param {string} text - The text to set.
+ * @param text - The text to set.
  */
-export const setTextOnSelectedElement = async (text: string) => {
-  const el = await webflow.getSelectedElement();
-  // Use a type guard to ensure the element has the `setTextContent` method.
-  // This is necessary because `AnyElement` can be a Component, which doesn't have this method.
-  if (el && 'setTextContent' in el && typeof el.setTextContent === 'function') {
-    await el.setTextContent(text);
-  } else {
-    await webflow.notify({ type: 'Error', message: 'Please select an element that can contain text.' });
+export const setTextOnSelectedElement = async (text: string): Promise<void> => {
+  try {
+    const el = await webflow.getSelectedElement();
+    if (el && 'setTextContent' in el && typeof el.setTextContent === 'function') {
+      await el.setTextContent(text);
+    } else {
+      await webflow.notify({ type: 'Error', message: 'Please select an element that can contain text.' });
+    }
+  } catch (error) {
+    handleApiError(error, `Error setting text content to "${text}":`);
   }
 };
 
+/**
+ * Sets the size of the extension window.
+ * @param size The desired size. Can be 'default', 'comfortable', 'large', or an object with width and height.
+ */
+export const setExtensionSize = async (
+  size: 'default' | 'comfortable' | 'large' | { width: number; height: number }
+): Promise<void> => {
+  try {
+    await webflow.setExtensionSize(size);
+    // A console log is sufficient here; no need to notify the user of a successful resize.
+    console.log(`Extension UI size set to:`, size);
+  } catch (error) {
+    handleApiError(error, 'Error setting extension size:');
+  }
+};
 
 // --- Variable Collection Functions ---
 
@@ -70,8 +121,7 @@ export const getAllVariableCollections = async (): Promise<VariableCollection[]>
     await webflow.notify({ type: 'Info', message: `Found ${collections.length} collections.` });
     return collections;
   } catch (error) {
-    console.error('Error getting all variable collections:', error);
-    await webflow.notify({ type: 'Error', message: 'Could not fetch variable collections.' });
+    handleApiError(error, 'Error getting all variable collections:');
     return [];
   }
 };
@@ -89,8 +139,7 @@ export const getVariableCollectionById = async (collectionId: string): Promise<V
     }
     return collection;
   } catch (error) {
-    console.error(`Error getting variable collection by ID ${collectionId}:`, error);
-    await webflow.notify({ type: 'Error', message: 'Could not fetch the specified collection.' });
+    handleApiError(error, `Error getting variable collection by ID ${collectionId}:`);
     return null;
   }
 };
@@ -107,8 +156,7 @@ export const getDefaultVariableCollection = async (): Promise<VariableCollection
     }
     return collection;
   } catch (error) {
-    console.error('Error getting default variable collection:', error);
-    await webflow.notify({ type: 'Error', message: 'Could not fetch the default collection.' });
+    handleApiError(error, 'Error getting default variable collection:');
     return null;
   }
 };
@@ -123,8 +171,7 @@ export const getCollectionName = async (collection: VariableCollection): Promise
   try {
     return await collection.getName();
   } catch (error) {
-    console.error('Error getting collection name:', error);
-    await webflow.notify({ type: 'Error', message: 'Could not get collection name.' });
+    handleApiError(error, 'Error getting collection name:');
     return null;
   }
 };
@@ -156,8 +203,7 @@ async function createVariable<T>(
     await webflow.notify({ type: 'Success', message: `${typeName} variable "${name}" created.` });
     return variable;
   } catch (error) {
-    console.error(`Error creating ${typeName.toLowerCase()} variable "${name}":`, error);
-    await webflow.notify({ type: 'Error', message: `Failed to create ${typeName.toLowerCase()} variable "${name}".` });
+    handleApiError(error, `Error creating ${typeName.toLowerCase()} variable "${name}":`);
     return null;
   }
 }
@@ -190,8 +236,7 @@ export const getAllVariablesFromCollection = async (collection: VariableCollecti
   try {
     return await collection.getAllVariables();
   } catch (error) {
-    console.error('Error getting all variables from collection:', error);
-    await webflow.notify({ type: 'Error', message: 'Could not fetch variables from the collection.' });
+    handleApiError(error, 'Error getting all variables from collection:');
     return [];
   }
 };
@@ -211,8 +256,7 @@ export const getVariableFromCollectionByName = async (collection: VariableCollec
     }
     return variable;
   } catch (error) {
-    console.error(`Error getting variable by name "${name}":`, error);
-    await webflow.notify({ type: 'Error', message: 'Could not fetch the specified variable.' });
+    handleApiError(error, `Error getting variable by name "${name}":`);
     return null;
   }
 };
@@ -228,8 +272,7 @@ export const getVariableFromCollectionById = async (collection: VariableCollecti
   try {
     return await collection.getVariable(id);
   } catch (error) {
-    console.error(`Error getting variable by ID "${id}":`, error);
-    await webflow.notify({ type: 'Error', message: 'Could not fetch the specified variable.' });
+    handleApiError(error, `Error getting variable by ID "${id}":`);
     return null;
   }
 };
@@ -246,8 +289,7 @@ export const renameVariable = async (variable: Variable, newName: string): Promi
     await variable.setName(newName);
     await webflow.notify({ type: 'Success', message: `Renamed variable "${oldName}" to "${newName}".` });
   } catch (error) {
-    console.error(`Error renaming variable to "${newName}":`, error);
-    await webflow.notify({ type: 'Error', message: 'Failed to rename variable.' });
+    handleApiError(error, `Error renaming variable to "${newName}":`);
   }
 };
 
@@ -263,8 +305,7 @@ export const setVariableValue = async (variable: Variable, value: any): Promise<
     const name = await variable.getName();
     await webflow.notify({ type: 'Success', message: `Updated value for variable "${name}".` });
   } catch (error) {
-    console.error('Error setting variable value:', error);
-    await webflow.notify({ type: 'Error', message: 'Failed to set variable value.' });
+    handleApiError(error, 'Error setting variable value:');
   }
 };
 
@@ -286,7 +327,70 @@ export const applyVariableToStyle = async (styleName: string, property: string, 
     await style.setProperties({ [property]: variable });
     await webflow.notify({ type: 'Success', message: `Applied variable to ${property} of style "${styleName}".` });
   } catch (error) {
-    console.error(`Error applying variable to style "${styleName}":`, error);
-    await webflow.notify({ type: 'Error', message: 'Failed to apply variable to style.' });
+    handleApiError(error, `Error applying variable to style "${styleName}":`);
+  }
+};
+
+/**
+ * Creates a base color variable and a series of lighter and darker shades based on it.
+ * Each shade is created by mixing the previous shade with white or black, maintaining a dynamic link.
+ * @param collectionId The ID of the collection to add variables to.
+ * @param baseName The name for the base color variable.
+ * @param baseColor The HEX value for the base color.
+ * @param darkerShades The number of darker shades to generate.
+ * @param lighterShades The number of lighter shades to generate.
+ * @param percentage The percentage step for color mixing.
+ */
+export const createColorShadeVariables = async (
+  collectionId: string,
+  baseName: string,
+  baseColor: string,
+  darkerShades: number,
+  lighterShades: number,
+  percentage: number
+): Promise<boolean> => {
+  try {
+    const collection = await getVariableCollectionById(collectionId);
+    if (!collection) {
+      // Notification is handled by getVariableCollectionById
+      return false;
+    }
+
+    // 1. Create the base color variable with the specified HEX value.
+    const baseVariable = await createColorVariable(collection, baseName, baseColor);
+    if (!baseVariable) return false; // Notification handled by createColorVariable
+
+    let lastLighterVar = baseVariable;
+    let lastDarkerVar = baseVariable;
+
+    // 2. Create lighter shades sequentially, each based on the previous one.
+    for (let i = 1; i <= lighterShades; i++) {
+      const lighterVarName = `${baseName}-L${i * 100}`;
+      const lastBinding = await lastLighterVar.getBinding();
+      if (!lastBinding) return false;
+
+      const customValue = { type: 'custom', value: `color-mix(in srgb, ${lastBinding}, white ${percentage}%)` };
+      const newLighterVar = await createColorVariable(collection, lighterVarName, customValue);
+      if (!newLighterVar) return false;
+      lastLighterVar = newLighterVar;
+    }
+
+    // 3. Create darker shades sequentially, each based on the previous one.
+    for (let i = 1; i <= darkerShades; i++) {
+      const darkerVarName = `${baseName}-D${i * 100}`;
+      const lastBinding = await lastDarkerVar.getBinding();
+      if (!lastBinding) return false;
+
+      const customValue = { type: 'custom', value: `color-mix(in srgb, ${lastBinding}, black ${percentage}%)` };
+      const newDarkerVar = await createColorVariable(collection, darkerVarName, customValue);
+      if (!newDarkerVar) return false;
+      lastDarkerVar = newDarkerVar;
+    }
+
+    await webflow.notify({ type: 'Success', message: 'Color shade variables created successfully!' });
+    return true;
+  } catch (error) {
+    handleApiError(error, 'Failed during color shade generation process:');
+    return false;
   }
 };
