@@ -15,7 +15,7 @@ interface ShadeGeneratorForm {
   baseColor: string;
   darkerShades: string;
   lighterShades: string;
-  colorPercentage: string;
+  colorPercentage: string;z
   // A special key for combined errors
   shades: string;
 }

@@ -1,0 +1,118 @@
+  <style>
+  
+  [data-cardStyle="grey"] {
+    border-top-color: var(--_cards---light-card--light-card-border-color);
+    border-right-color: var(--_cards---light-card--light-card-border-color);
+    border-bottom-color: var(--_cards---light-card--light-card-border-color);
+    border-left-color: var(--_cards---light-card--light-card-border-color);
+    background-color: var(--_cards---grey-card--grey-card-bg);
+    color: var(--_cards---grey-card--grey-card-text-color);
+  }
+
+  [data-cardStyle="grey"]:hover {
+    background-color: var(--_cards---grey-card--grey-card-bg-dim);
+    border-top-color: var(--_cards---grey-card--grey-card-border-color-dim);
+    border-right-color: var(--_cards---grey-card--grey-card-border-color-dim);
+    border-bottom-color: var(--_cards---grey-card--grey-card-border-color-dim);
+    border-left-color: var(--_cards---grey-card--grey-card-border-color-dim);
+    box-shadow: rgba(28, 68, 127, 0.25) 0px 2px 20px 0px;
+    color: var(--_cards---grey-card--grey-card-text-dim);
+  }
+
+  [data-cardStyle="grey-inverse"] {
+    border-top-color: var(--_cards---light-card--light-card-border-color);
+    border-right-color: var(--_cards---light-card--light-card-border-color);
+    border-bottom-color: var(--_cards---light-card--light-card-border-color);
+    border-left-color: var(--_cards---light-card--light-card-border-color);
+    background-color: var(--_cards---grey-card--grey-card-bg);
+    color: var(--_cards---grey-card--grey-card-text-color);
+  }
+
+  [data-cardStyle="grey-inverse"]:hover {
+    background-color: var(--_cards---grey-card--grey-card-bg-inverse);
+    border-top-color: var(--_cards---grey-card--grey-card-border-color-inverse);
+    border-right-color: var(--_cards---grey-card--grey-card-border-color-inverse);
+    border-bottom-color: var(--_cards---grey-card--grey-card-border-color-inverse);
+    border-left-color: var(--_cards---grey-card--grey-card-border-color-inverse);
+    box-shadow: rgba(28, 68, 127, 0.25) 0px 2px 20px 0px;
+    color: var(--_cards---grey-card--grey-card-text-inverse);
+  }
+
+  [data-cardStyle="light"] {
+    border-top-color: var(--_cards---light-card--light-card-border-color);
+    border-right-color: var(--_cards---light-card--light-card-border-color);
+    border-bottom-color: var(--_cards---light-card--light-card-border-color);
+    border-left-color: var(--_cards---light-card--light-card-border-color);
+    background-color: var(--_cards---light-card--light-card-bg);
+    color: var(--_cards---light-card--light-card-text-color);
+  }
+
+  [data-cardStyle="light"]:hover {
+    background-color: var(--_cards---light-card--light-card-bg-dim);
+    border-top-color: var(--_cards---light-card--light-card-border-color-dim);
+    border-right-color: var(--_cards---light-card--light-card-border-color-dim);
+    border-bottom-color: var(--_cards---light-card--light-card-border-color-dim);
+    border-left-color: var(--_cards---light-card--light-card-border-color-dim);
+    box-shadow: rgba(28, 68, 127, 0.25) 0px 2px 20px 0px;
+    color: var(--_cards---light-card--light-card-text-color-dim);
+  }
+
+  [data-cardStyle="light-inverse"] {
+    border-top-color: var(--_cards---light-card--light-card-border-color);
+    border-right-color: var(--_cards---light-card--light-card-border-color);
+    border-bottom-color: var(--_cards---light-card--light-card-border-color);
+    border-left-color: var(--_cards---light-card--light-card-border-color);
+    background-color: var(--_cards---light-card--light-card-bg);
+    color: var(--_cards---light-card--light-card-text-color);
+  }
+
+  [data-cardStyle="light-inverse"]:hover {
+    background-color: var(--_cards---light-card--light-card-bg-inverse);
+    border-top-color: var(--_cards---light-card--light-card-border-color-inverse);
+    border-right-color: var(--_cards---light-card--light-card-border-color-inverse);
+    border-bottom-color: var(--_cards---light-card--light-card-border-color-inverse);
+    border-left-color: var(--_cards---light-card--light-card-border-color-inverse);
+    box-shadow: rgba(28, 68, 127, 0.25) 0px 2px 20px 0px;
+    color: var(--_cards---light-card--light-card-text-color-inverse);
+  }
+
+
+  [data-cardStyle="dark"] {
+    border-top-color: var(--_cards---dark-card--dark-card-border-color);
+    border-right-color: var(--_cards---dark-card--dark-card-border-color);
+    border-bottom-color: var(--_cards---dark-card--dark-card-border-color);
+    border-left-color: var(--_cards---dark-card--dark-card-border-color);
+    background-color: var(---_cards---dark-card--dark-card-bg);
+    color: var(--_cards---dark-card--dark-card-dark-text-color);
+  }
+
+  [data-cardStyle="dark"]:hover {
+    background-color: var(--_cards---dark-card--dark-card-bg-hover-dim);
+    border-top-color: var(--_cards---dark-card--dark-card-border-color-dim);
+    border-right-color: var(--_cards---dark-card--dark-card-border-color-dim);
+    border-bottom-color: var(--_cards---dark-card--dark-card-border-color-dim);
+    border-left-color: var(--_cards---dark-card--dark-card-border-color-dim);
+    box-shadow: rgba(28, 68, 127, 0.25) 0px 2px 20px 0px;
+    color: var(--_cards---dark-card--dark-card-dark-text-color-dim);
+  }
+
+  [data-cardStyle="dark-inverse"] {
+    border-top-color: var(--_cards---dark-card--dark-card-border-color);
+    border-right-color: var(--_cards---dark-card--dark-card-border-color);
+    border-bottom-color: var(--_cards---dark-card--dark-card-border-color);
+    border-left-color: var(--_cards---dark-card--dark-card-border-color);
+    background-color: var(---_cards---dark-card--dark-card-bg);
+    color: var(--_cards---dark-card--dark-card-dark-text-color);
+  }
+
+  [data-cardStyle="dark-inverse"]:hover {
+    background-color: var(--_cards---dark-card--dark-card-bg-hover-inverse);
+    border-top-color: var(--_cards---dark-card--dark-card-border-color-inverse);
+    border-right-color: var(--_cards---dark-card--dark-card-border-color-inverse);
+    border-bottom-color: var(--_cards---dark-card--dark-card-border-color-inverse);
+    border-left-color: var(--_cards---dark-card--dark-card-border-color-inverse);
+    box-shadow: rgba(28, 68, 127, 0.25) 0px 2px 20px 0px;
+    color: var(--_cards---dark-card--dark-card-dark-text-color-dim);
+  }
+
+  </style>
